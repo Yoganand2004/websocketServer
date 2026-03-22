@@ -1,0 +1,21 @@
+#div1 {
+ position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  background: rgb(156, 176, 244);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  
+}
+
+#div1_1{
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;     
+    position: relative;
+    left: 20px;
+    padding-right: 10px;
+}
