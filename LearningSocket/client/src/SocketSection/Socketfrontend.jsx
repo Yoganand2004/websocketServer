@@ -5,37 +5,46 @@ import { io } from "socket.io-client";
 const socket = io("http://localhost:8003");
 
 function App() {
-  const [message, setMessage] = useState("");
-  const [received, setReceived] = useState("");
+  const [message, setMessage] = useState([]);
+  const [received, setReceived] = useState([]);
+  const [roomId, setroomId] = useState("");
 
   useEffect(() => { 
-    socket.on("receive_message", (data) => {
+    socket.on("receive-message", (data) => {
+      setReceived((prev)=>[...prev , data.message]);
       
-      
-      setReceived(data);
     });
-    socket.on("welcome", (s)=>{
-      console.log(s);
-    }) 
-    socket.on("private_msg",{
-      targetSocketId:''
-      
-      
-    })
     
     return () => {
-      socket.off("receive_message");
-      socket.off("welcome");
+      socket.off("receive-message");
     };
   }, []);
 
-  const sendMessage = () => {
-    socket.emit("send_message", message);
+  const joinRoom =()=>{
+    socket.emit("join-room",roomId)
   };
+
+
+  const sendMessage = () => {
+    socket.emit("send-message", {
+      roomId:roomId,
+      message:message
+    });
+  };
+
+  
   return (
     <div style={{ padding: "20px" }}>
       <h2>Socket.IO React Example</h2>
-
+      <input
+      type="number"
+      placeholder="roomNo"
+      value={roomId}
+      onChange={(e)=>setroomId(e.target.value)}
+      
+      />
+      <button onClick={joinRoom}>Join</button>
+    <br/>
       <input
         type="text"
         placeholder="Enter message"
@@ -45,7 +54,12 @@ function App() {
 
       <button onClick={sendMessage}>Send</button>
 
-      <h3>Received: {received}</h3>
+      <h3>Messages:</h3>
+      {received.map((msg, i) => (
+        <p key={i}>
+          {msg}
+        </p>
+      ))}
     </div>
   );
 }
