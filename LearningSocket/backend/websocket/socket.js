@@ -1,29 +1,30 @@
-let currentroom = null;
+let currentroom = null
+let rooms  ={}
 
 const socketHandler = (io) => {
-  io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
 
-    socket.on("join-room", (roomId)=>{
-      if(currentroom){
-        socket.leave(currentroom)
-      }
-      socket.join(roomId)
-      currentroom=roomId
-      console.log(`Socket ${socket.id} joined room ${roomId}`);
-    })
+io.on("connection", (socket) => {
+  console.log("User connected",socket.id);
 
-    socket.on("send-message",({roomId,message})=>{
-      socket.to(roomId).emit('receive-message',{
-        message,
-        sender: socket.id
-      })
-    })
+  socket.on("join-room", (roomId) => {
+    if(currentroom){
+      socket.leave(currentroom)
+    }
+    socket.join(roomId);
+    currentroom=roomId
+    if (!rooms[roomId]) rooms[roomId] = "";
 
-    socket.on("disconnect", () => {
-      console.log(`left: ${socket.id}`);
-    });
+    // send existing text
+    socket.emit("load-text", rooms[roomId]);
+
   });
+  socket.on("send-text",({roomId,text})=>{
+    rooms[roomId]=text;
+    socket.to(roomId).emit("receive-text",text)
+  })
+
+});
+
 };
 
 module.exports = socketHandler;

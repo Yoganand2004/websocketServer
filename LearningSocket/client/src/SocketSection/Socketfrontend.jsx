@@ -1,67 +1,85 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import "./Socketfrontend.css"
 
 // connect to backend
 const socket = io("http://localhost:8003");
 
-function App() {
-  const [message, setMessage] = useState([]);
-  const [received, setReceived] = useState([]);
+function SocketFrontand() {
+  const [text, setText] = useState("");
   const [roomId, setroomId] = useState("");
-
-  useEffect(() => { 
-    socket.on("receive-message", (data) => {
-      setReceived((prev)=>[...prev , data.message]);
-      
-    });
-    
+  const [joined, setJoined] = useState(false);
+  useEffect(()=>{
+    socket.on("load-text",(data)=>{
+      setText(data);
+    })
+    socket.on("receive-text",(data)=>{
+      setText(data);
+    })
     return () => {
-      socket.off("receive-message");
+      socket.off("load-text");
+      socket.off("receive-text");
     };
-  }, []);
 
-  const joinRoom =()=>{
-    socket.emit("join-room",roomId)
-  };
+  },[])
+  // const handleChange
 
-
-  const sendMessage = () => {
-    socket.emit("send-message", {
+  const handleChange = (e)=>{
+    setText(e.target.value)
+    socket.emit("send-text",{
       roomId:roomId,
-      message:message
-    });
-  };
+      text:e.target.value
+    })
+  }
 
-  
+  const JoinRoom =()=>{
+    if (roomId.trim() === "") {
+      alert("Please enter a room ID");
+      return;
+    }
+    socket.emit("join-room", roomId);
+    setJoined(true);
+  }
+
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Socket.IO React Example</h2>
-      <input
-      type="number"
-      placeholder="roomNo"
-      value={roomId}
-      onChange={(e)=>setroomId(e.target.value)}
-      
-      />
-      <button onClick={joinRoom}>Join</button>
-    <br/>
-      <input
-        type="text"
-        placeholder="Enter message"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-
-      <button onClick={sendMessage}>Send</button>
-
-      <h3>Messages:</h3>
-      {received.map((msg, i) => (
-        <p key={i}>
-          {msg}
-        </p>
-      ))}
+    <>
+    <h2>Cross Device Text</h2>
+    <div>
+      <input 
+          type="text"
+          onChange={(e)=>setroomId(e.target.value)}
+          placeholder="Enter Port Number"/>
+            <button onClick={JoinRoom}>Join</button>
     </div>
+    <div>
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>
+      
+      <textarea
+        value={text}
+        onChange={handleChange}
+        placeholder="Type your message here..."
+        rows={10}
+        style={{
+          width: "600px",
+          padding: "15px",
+          fontSize: "16px",
+          borderRadius: "10px",
+          border: "1px solid #ccc",
+          outline: "none",
+          resize: "none",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        }}
+      />
+
+    </div>
+    </div>
+
+    
+      
+
+    </>
   );
 }
 
-export default App;
+export default SocketFrontand;
