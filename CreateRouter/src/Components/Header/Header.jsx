@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "./33be6921-e135-48f4-a9cb-1447cdd4c032.png";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 
 export default function Header() {
@@ -13,10 +14,11 @@ export default function Header() {
 
   const handleLogOut = async () => {
     try {
-      await axios.post("http://localhost:8002/auth/logout",{},{
+      await axios.post("https://anywherewritex.onrender.com/auth/logout",{},{
         withCredentials: true
       })
     localStorage.removeItem("JWT Token");
+    Cookies.remove("token");
     localStorage.removeItem("LoggedInUser");
     setDropdownOpen(false);
 
@@ -54,15 +56,15 @@ export default function Header() {
           <div className="hidden lg:flex items-center justify-between flex-1 ml-6">
 
             {/* Nav Links */}
-            <ul className="flex items-center gap-8 mx-auto">
+            <ul className="flex items-center gap-8 mx-auto list-none">
               {["/Home", "/About", "/Github"].map((path, i) => (
                 <li key={i}>
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
-                      `block py-2 px-1 font-medium border-b-2 transition-colors duration-200 ${
+                      `block py-2 px-1 font-medium border-b-2 transition-all duration-300 ease-in-out transform hover:scale-105 ${
                         isActive
-                          ? "border-blue-500 text-blue-600"
+                          ? "border-blue-500 text-blue-600 shadow-sm"
                           : "border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-300"
                       }`
                     }
@@ -92,10 +94,10 @@ export default function Header() {
             ) : (
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-gray-700 font-medium"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-blue-100 transition-all duration-200 ease-in-out transform hover:scale-105 text-gray-700 font-medium cursor-pointer"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 >
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm hover:shadow-lg transition-shadow">
                     {LoggedInUser?.charAt(0).toUpperCase()}
                   </span>
                   Hi {LoggedInUser}
@@ -127,17 +129,17 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden pb-4 border-t border-gray-100 mt-2">
-            <ul className="flex flex-col gap-1 mt-2">
+          <div className="lg:hidden pb-4 border-t border-gray-100 mt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <ul className="flex flex-col gap-1 mt-2 list-none">
               {["/Home", "/About", "/Github"].map((path, i) => (
                 <li key={i}>
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
-                      `block py-2 px-3 rounded-md font-medium transition-colors ${
+                      `block py-2 px-3 rounded-md font-medium transition-all duration-200 ease-in-out transform ${
                         isActive
-                          ? "bg-blue-50 text-blue-600"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-blue-500"
+                          ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600 pl-2"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-blue-500 hover:pl-5"
                       }`
                     }
                     onClick={() => setMobileMenuOpen(false)}

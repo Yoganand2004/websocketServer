@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, Navigate ,useNavigate} from "react-router-dom";
 import "./Login_Signup.css";
 import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 function Login() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ function Login() {
           toast.error("Password must be at least 5 characters");
           return;
         }
-        const response = await fetch("http://localhost:8002/auth/login", {
+        const response = await fetch("https://anywherewritex.onrender.com/auth/login", {
           method: "POST",
           credentials:"include",
           headers: {
@@ -37,11 +38,11 @@ function Login() {
       else{
         toast.success("Login successful")
         localStorage.setItem("JWT Token",result.token)
+        Cookies.set("token", result.token, { expires: 7 });
         localStorage.setItem("LoggedInUser",result.name)
         setTimeout(() => {
           navigate("/Home")
         }, 2000);
-
       }
     }
     catch (error) {

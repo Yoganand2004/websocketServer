@@ -7,7 +7,7 @@ const socket = io("http://localhost:8003");
 
 function SocketFrontand() {
   const [text, setText] = useState("");
-  const [roomId, setroomId] = useState("");
+  const [roomId, setroomId] = useState(0);
   const [joined, setJoined] = useState(false);
   useEffect(()=>{
     socket.on("load-text",(data)=>{
@@ -33,7 +33,7 @@ function SocketFrontand() {
   }
 
   const JoinRoom =()=>{
-    if (roomId.trim() === "") {
+    if (!roomId || roomId === 0) {
       alert("Please enter a room ID");
       return;
     }
@@ -47,9 +47,9 @@ function SocketFrontand() {
     <h2>Cross Device Text</h2>
     <div>
       <input 
-          type="text"
-          onChange={(e)=>setroomId(e.target.value)}
-          placeholder="Enter Port Number"/>
+          type="number"
+          onChange={(e)=>setroomId(Number(e.target.value))}
+          placeholder="Enter Room ID"/>
             <button onClick={JoinRoom}>Join</button>
     </div>
     <div>

@@ -42,7 +42,7 @@ function Signup() {
 
     const{confirmPassword, ...dataToSend} =formData
 
-    const response = await fetch("http://localhost:8002/auth/signup", {
+    const response = await fetch("https://anywherewritex.onrender.com/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

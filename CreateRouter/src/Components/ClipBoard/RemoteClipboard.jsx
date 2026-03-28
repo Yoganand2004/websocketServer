@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import {useNavigate} from "react-router-dom"
 import Cookies from 'js-cookie';
+import { io } from "socket.io-client";
+
+const socket = io("https://anywherewritex.onrender.com");
 
 function generatePort() {
   return String(Math.floor(10000 + Math.random() * 90000));
@@ -22,13 +25,30 @@ export default function RemoteClipboard() {
   const [joinError, setJoinError] = useState("");
 
   const textareaRef = useRef(null);
-
   useEffect(() => {
+  socket.emit("join-port", port);
+}, []); 
+  useEffect(() => {
+
     setCharCount(text.length);
-  }, [text]);
+    socket.on("load-text",(data)=>{
+      setText(data);
+    })
+    socket.on("receive-text",(data)=>{
+      setText(data);
+    })
+    return () => {
+      socket.off("load-text");
+      socket.off("receive-text");
+    };
+  }, []);
 
   const handleNewPort = () => {
-    setPort(generatePort());
+    socket.emit("clear-room", port);    
+    socket.emit("leave-port",port)
+    const portGeneratednow = generatePort()
+    setPort(portGeneratednow);
+    socket.emit("join-port",portGeneratednow)
     setText("");
     setJoinError("");
   };
@@ -51,6 +71,8 @@ export default function RemoteClipboard() {
       setJoinError("Enter a valid 5-digit port");
       return;
     }
+    socket.emit("leave-port", port);
+    socket.emit("join-port",val)
     setPort(val);
     setInputPort("");
     setJoinError("");
@@ -87,6 +109,13 @@ export default function RemoteClipboard() {
       textareaRef.current?.focus();
     }
   };
+  const handleChange = (e)=>{
+    setText(e.target.value)
+    socket.emit("send-text",{
+      roomId:port,
+      text:e.target.value
+    })
+  }
 
   return (
     <div
@@ -337,7 +366,7 @@ export default function RemoteClipboard() {
               <textarea
                 ref={textareaRef}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={handleChange}
                 placeholder="Type or paste your text here..."
                 className="w-full bg-transparent text-white/85 resize-none outline-none leading-relaxed"
                 style={{
